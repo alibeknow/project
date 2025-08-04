@@ -1,0 +1,217 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+const app = require('../app');
+const debug = require('debug')('bs-backend:server');
+const http = require('http');
+const models = require('../models');
+const apiDaemon = require('../api_daemon/apiDaemonOld');
+const statusDaemon = require('../status_daemon/statusDaemon');
+const logsDaemon = require('../logs_daemon/logsDaemon');
+const env = process.env.NODE_ENV || 'development';
+
+if (env != 'development') require('console-stamp')(console);
+
+//const heapdump = require("heapdump");
+
+const faker = require('faker');
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+const port = normalizePort(process.env.PORT || '8000');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+const server = http.createServer(app);
+
+models.sequelize.sync({ force: false }).then(() => {
+  (async() => {
+    return; // remove this only if you are sure what you are doing :)
+
+    let company = await models.Company.create({
+      name: { en: 'BestSender', ru: 'BestSender' },
+      isPrimary: true,
+    });
+
+    let group = await models.Group.create({
+      name: { en: 'Default', ru: 'Default' },
+      isDefault: true,
+    });
+
+    await models.User.create({
+      CompanyId: company.id,
+      email: '***********',
+      password: '*********',
+      firstName: '********',
+      lastName: '***********',
+      phone: '+0000000',
+      role: 'su',
+      isActive: true,
+      isAPIActive: true,
+    });
+    let userGroup = await models.UserGroup.create({
+      UserId: 1,
+      GroupId: 1,
+    });
+
+    let packageType = await models.PackageType.create({
+      type: 'box',
+      defaultWeight: 0.25,
+      defaultWidth: 10,
+      defaultHeight: 10,
+      defaultDepth: 10,
+    });
+    packageType = await models.PackageType.create({
+      type: 'documents',
+      defaultWeight: 0.2,
+      defaultWidth: 23,
+      defaultHeight: 35,
+      defaultDepth: 1,
+    });
+    packageType = await models.PackageType.create({
+      type: 'pallet',
+      defaultWeight: 100,
+      defaultWidth: 80,
+      defaultHeight: 120,
+      defaultDepth: 80,
+    });
+    packageType = await models.PackageType.create({
+      type: 'custom',
+      defaultWeight: -1,
+      defaultWidth: -1,
+      defaultHeight: -1,
+      defaultDepth: -1,
+    });
+
+    let rateType = await models.RateType.create({
+      type: 'standard',
+    });
+    rateType = await models.RateType.create({
+      type: 'economy',
+    });
+    rateType = await models.RateType.create({
+      type: 'express',
+    });
+    rateType = await models.RateType.create({
+      type: 'super_express',
+    });
+
+  })();
+
+  /**
+   * Listen on provided port, on all network interfaces.
+   */
+
+  //console.log('Yippee ki-yay, motherfucker!');
+
+  server.listen(port);
+  server.on('error', onError);
+  server.on('listening', onListening);
+
+  apiDaemon.run();
+  statusDaemon.run();
+  logsDaemon.run();
+});
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  let port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  let bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  let addr = server.address();
+  let bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
+
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  server.close((err) => {
+    console.log('HTTP server closed');
+    models.sequelize.connectionManager.close().then((err) => {
+      console.log('DB shut down gracefully');
+      process.exit(0);
+    });
+  });
+});
+
+process
+  .on('unhandledRejection', (reason, p) => {
+    console.error(reason, 'Unhandled Rejection at Promise', p);
+  })
+  .on('uncaughtException', err => {
+    console.error(err, 'Uncaught Exception thrown');
+    process.exit(1);
+  });
+
+// setInterval(() => {
+//   const memoryLimit = 314572800;
+//   const memoryUsage = process.memoryUsage();
+//   //console.log('memoryUsage:', memoryUsage);
+//
+//   if (memoryUsage.heapUsed > memoryLimit) {
+//     //console.log('memoryUsage is too high! Making a heapdump...');
+//
+//     heapdump.writeSnapshot(function(err, filename) {
+//       if (err) throw err;
+//       //console.log('heapdump dump written to', filename);
+//     });
+//   }
+// }, 10000);

@@ -1,0 +1,10 @@
+Зарегистрирован новый пользователь.
+
+Имя: {{ user.prettyName }}
+{{ user.companyName }}
+
+Контактные данные: email {{ user.email }}, телефон {{ user.phone }}
+
+--
+С уважением,
+Робот bestsender.kz 

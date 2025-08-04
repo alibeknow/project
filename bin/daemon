@@ -1,0 +1,39 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var models = require('../models');
+var apiDaemon = require('../api_daemon/apiDaemonOld');
+var statusDaemon = require('../status_daemon/statusDaemon');
+var logsDaemon = require('../logs_daemon/logsDaemon');
+
+var env = process.env.NODE_ENV || 'development';
+
+if (env != 'development') require('console-stamp')(console);
+
+
+models.sequelize.sync({ force: false }).then(() => {
+  apiDaemon.run();
+  statusDaemon.run();
+  logsDaemon.run();
+});
+
+
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  models.sequelize.connectionManager.close().then((err) => {
+    console.log('DB shut down gracefully');
+    process.exit(0);
+  });
+});
+
+process
+  .on('unhandledRejection', (reason, p) => {
+    console.error(reason, 'Unhandled Rejection at Promise', p);
+  })
+  .on('uncaughtException', err => {
+    console.error(err, 'Uncaught Exception thrown');
+    process.exit(1);
+  });

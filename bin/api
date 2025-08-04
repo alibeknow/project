@@ -1,0 +1,38 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+const models = require('../models');
+const apiDaemon = require('../api_daemon/apiDaemon');
+
+const env = process.env.NODE_ENV || 'development';
+
+const api = process.env.BS_API;
+if (!api) throw Error('BS_API env variable is not defined');
+
+if (env != 'development') require('console-stamp')(console);
+
+
+models.sequelize.sync({ force: false }).then(() => {
+  apiDaemon.run();
+});
+
+
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  models.sequelize.connectionManager.close().then((err) => {
+    console.log('DB shut down gracefully');
+    process.exit(0);
+  });
+});
+
+process
+  .on('unhandledRejection', (reason, p) => {
+    console.error(reason, 'Unhandled Rejection at Promise', p);
+  })
+  .on('uncaughtException', err => {
+    console.error(err, 'Uncaught Exception thrown');
+    process.exit(1);
+  });

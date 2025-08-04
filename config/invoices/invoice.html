@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <mate charest="utf-8" />
+        <style type="text/css">
+            body {
+              font-size: 10pt;
+              width: 210mm;
+              height: 297px;
+              float: none;
+              margin: auto
+            }
+            .container {
+                display: flex;
+                flex-direction:column;
+                align-content: center;
+                padding: 20px;
+            }
+
+            .header {
+                border-bottom: 2px solid #1198d3;
+                margin-bottom: 20px;
+                padding-bottom: 20px;
+            }
+            .header-data {
+                float:right;
+                font-weight:bold;
+                display:block;
+                height:68px;
+                text-align:center
+            }
+            .footer-data {
+                display: block;
+                float: none;
+                font-weight:normal;
+                font-style:italic;
+                text-align:center
+            }
+            .header-data sub {
+                font-weight:normal;
+                font-style:italic;
+            }
+            .order-summary {
+                text-align:center;
+                border:1px dotted #000;
+                width:96%;
+                float:none;
+                margin:auto;
+                margin-bottom:20px;
+
+            }
+
+            .note {
+                color: red;
+                text-align: center;
+                padding: 30px 10px;
+                font-style: italic;
+                font-size: 13pt
+            }
+            .inverted {
+                color: #333!important;
+            }
+			.tg-wrap {
+				width: 96%;
+				float: none;
+				margin: auto;
+			}
+
+			.tg {
+				border-collapse: collapse;
+				border-spacing: 0;
+				margin: 0px auto;
+				width: 100%;
+			}
+
+			.tg td {
+				border-color: #333;
+				border-style: solid;
+				border-width: 1px;
+				font-family: Arial, sans-serif;
+				overflow: hidden;
+				padding: 10px 5px;
+				word-break: normal;
+                vertical-align: middle;
+			}
+
+			.tg th {
+				border-color: #333;
+				border-style: solid;
+				border-width: 1px;
+				font-family: Arial, sans-serif;
+				font-weight: bold;
+				overflow: hidden;
+				padding: 10px 5px;
+				word-break: normal;
+                color: #000;
+                font-size: 9pt;
+			}
+
+			h2,h3 {
+				vertical-align: top;
+				text-align: center;
+                font-style:italic;
+                margin-bottom:20px;
+			}
+
+            .w25 {
+                max-width: 25mm!important;
+            }
+            .w15 {
+                max-width: 15mm!important;
+            }
+            .w20 {
+                max-width: 20mm!important;
+            }
+            .w80 {
+                max-width: 80mm!important;
+            }
+            .payment-data {
+                padding: 10px 20px!important;
+                line-height: 1.5;
+                font-size: 13pt
+            }
+
+
+
+		</style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyNS4yLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9IjAgMCA1NDUuODggMTUzLjUzIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1NDUuODggMTUzLjUzOyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+DQo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPg0KCS5zdDB7ZmlsbDojRkIzNjQwO30NCgkuc3Qxe2ZpbGw6I0ZGQUFFQTt9DQoJLnN0MntmaWxsOiMwNjJFQjE7fQ0KPC9zdHlsZT4NCjxyZWN0IHk9Ii0wLjI4IiBjbGFzcz0ic3QwIiB3aWR0aD0iMTUzLjgxIiBoZWlnaHQ9IjE1My44MSIvPg0KPHBvbHlnb24gcG9pbnRzPSI3Ni44OSw3Ni42MyAxMjEuNzYsMzEuNzYgMzIuMDMsMzEuNzYgMzIuMDMsMTIxLjQ5IDc2Ljg5LDEyMS40OSAiLz4NCjxwb2x5Z29uIGNsYXNzPSJzdDEiIHBvaW50cz0iMTIxLjc1LDMxLjc2IDc2Ljg4LDc2LjYzIDEyMS43NSw3Ni42MyAiLz4NCjxnPg0KCTxnPg0KCQk8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMjkzLjY5LDEwMy44MmM1LjcyLTAuMSwxMy43My0zLjAyLDE2LjY0LTkuMDVsMC42Miw3LjQ5aDExLjk2VjUwLjk5aC0xMi4xN2wtMC40Miw3LjA3DQoJCQljLTIuOTEtNS4xLTkuNDYtOC4zMi0xNi4zMy04LjMyYy0xNC45OC0wLjEtMjYuNzMsOS4xNS0yNi43MywyNi44M0MyNjcuMjcsOTQuNTcsMjc4LjUxLDEwMy45MywyOTMuNjksMTAzLjgyeiBNMjk1LjE1LDYxLjA4DQoJCQljMTkuOTcsMCwxOS45NywzMS4wOSwwLDMxLjA5Yy04LjQyLDAtMTUuMTgtNS44Mi0xNS4xOC0xNS42QzI3OS45Niw2Ni44LDI4Ni43Miw2MS4wOCwyOTUuMTUsNjEuMDh6Ii8+DQoJCTxwb2x5Z29uIGNsYXNzPSJzdDIiIHBvaW50cz0iNDI5LjE5LDUxLjcyIDQyOS4xOSw1MC45OSA0MTQuMDEsNTAuOTkgMzk2Ljc1LDcxLjU4IDM5Ni43NSwzMS43NiAzODQuMDYsMzEuNzYgMzg0LjA2LDEwMi4yNiANCgkJCTM5Ni43NSwxMDIuMjYgMzk2Ljc1LDc5LjA3IDQxNi44MiwxMDIuMjYgNDMyLjExLDEwMi4yNiA0MzIuMTEsMTAxLjMzIDQwOC4yOSw3NS4xMiAJCSIvPg0KCQk8cGF0aCBjbGFzcz0ic3QyIiBkPSJNNDU5Ljg3LDQ5Ljk1Yy0xNi4zMywwLTI2LjUyLDEyLjA2LTI2LjUyLDI2LjczYzAsMTQuNzcsOS45OCwyNi43MywyNi42MiwyNi43Mw0KCQkJYzE2LjY0LDAsMjYuNzMtMTEuOTYsMjYuNzMtMjYuNzNDNDg2LjcxLDYyLjAyLDQ3Ni4yLDQ5Ljk1LDQ1OS44Nyw0OS45NXogTTQ1OS45OCw5MS43NmMtOS4yNiwwLTEzLjk0LTcuMjgtMTMuOTQtMTUuMDgNCgkJCWMwLTcuNyw0Ljc4LTE1LjE4LDEzLjk0LTE1LjE4YzguNTMsMCwxMy45Myw3LjQ5LDEzLjkzLDE1LjE4QzQ3My45MSw4NC40OCw0NjkuMjMsOTEuNzYsNDU5Ljk4LDkxLjc2eiIvPg0KCQk8cGF0aCBjbGFzcz0ic3QyIiBkPSJNNTI0LjE0LDUwLjE2Yy02LjQ1LDAtMTEuNjUsMi42LTE2Ljg1LDcuN2wtMC44My02Ljk3aC0xMS4zNHY1MS4zN2gxMi41OFY3Ni4wNWMwLTcuOCw1LjMtMTQuMzUsMTMuMS0xNC4zNQ0KCQkJYzguMTEsMCwxMi4zOCw1LjkzLDEyLjM4LDEzLjczdjI2LjgzaDEyLjY5Vjc1LjMzQzU0NS44OCw1OS4yMSw1MzYuMjEsNTAuMTYsNTI0LjE0LDUwLjE2eiIvPg0KCQk8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMzU5LDkxLjY1Yy03LjksMC0xNC41Ni01LjItMTQuNTYtMTQuOThjMC04Ljk0LDYuMjQtMTUuMTgsMTQuNzctMTUuMThjMy41NCwwLDcuMjgsMS4zNSwxMC4zLDQuMDYNCgkJCWw4LjAxLTguNDJjLTUuNjItNS41MS0xMS4yMy03LjU5LTE4LjUxLTcuNTljLTE0Ljg3LDAtMjcuMjUsOC45NC0yNy4yNSwyNy4xNGMwLDE4LjIsMTIuMzgsMjcuMTQsMjcuMjUsMjcuMTQNCgkJCWM3LjU5LDAsMTMuODMtMi4yOSwxOS43Ni04LjExbC04LjUzLTguMzJDMzY3LjExLDkwLjUxLDM2My4wNSw5MS42NSwzNTksOTEuNjV6Ii8+DQoJCTxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0yMTcuNzcsMTIxLjQ5Vjk2LjIzYzMuNjQsNS42MiwxMS42NSw3LjI4LDE3LjA1LDcuMjhjMTYuNDMsMCwyNS45LTExLjg2LDI1LjktMjYuODMNCgkJCWMwLTE1LjA4LTEwLjUtMjYuODMtMjYuMzEtMjYuODNjLTUuODIsMC0xMi42OSwyLjUtMTYuNjQsOC4yMmwtMC44My03LjA3aC0xMS44NnY3MC41SDIxNy43N3ogTTIzMy40Nyw2Mi4xMg0KCQkJYzkuMTUsMCwxNC41Niw2LjU1LDE0LjU2LDE0LjU2YzAsOC4wMS01LjkzLDE0LjU2LTE0LjU2LDE0LjU2Yy04LjYzLDAtMTQuNTYtNi41NS0xNC41Ni0xNC41Ng0KCQkJQzIxOC45Miw2OC42NywyMjQuMzIsNjIuMTIsMjMzLjQ3LDYyLjEyeiIvPg0KCTwvZz4NCjwvZz4NCjwvc3ZnPg0K"
+                width="224px" height="54px" 
+                />
+                <div class="header-data">ООО "ПАКОН"<br />
+                    <sub > <strong>ИНН: 9701188438 </strong></sub><br />
+                    <sub > <strong>Email: {{ config.email }} </strong></sub><br />
+                    
+                </div>
+            </div>
+
+            <div class="tg-wrap">
+                <table class="tg">
+                    <thead>
+                    <tr>
+                        <h2 style="color:#1157a1; margin: 50px 0">Счёт к заказу #{{ order.refNo }} от {{ order.createdAtPretty }}</h2>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td class="w80"><h2>Получатель</h2></td>
+                        <td class="payment-data">
+                            <strong>Компания:</strong> ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ "ПАКОН"<br/>
+                            <strong>Юр.адрес:</strong> Российская Федерация, 105082, МОСКВА Г, ПЕРБАЛАКИРЕВСКИЙ, дом 23, стр ЭТ3 П309, К1 ОФ74<br/>
+                            <strong>ИНН:</strong> 9701188438<br/>
+                            <strong>Расчетный счет:</strong> 40702810810000928462<br/>
+                            <strong>ОГРН:</strong> 1217700526890<br/>
+                            <strong>Банк:</strong> АО «Тинькофф Банк»<br/>
+                            <strong>БИК банка:</strong> 044525974<br/>
+                            <strong>ИНН банка:</strong> 7710140679<br/>
+                            <strong>Корреспондентский счет банка:</strong> 30101810145250000974<br/>
+                            <strong>Юридический адрес банка:</strong> 127287, г. Москва, ул. Хуторская 2-я, д. 38А, стр. 26<br/>
+
+                            
+
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <br />
+            <div class="note">
+                Пожалуйста, оплатите счет в течение 5 дней. В противном случае Ваш заказ будет отменен.
+                Размещение и обработка заказа начинаются только после внесения оплаты.
+            </div>
+            <div class="tg-wrap">
+                <table class="tg">
+                    <theader>
+                        <tr class="inverted">
+                            <th class="w80">Наименование услуги</th>
+                            <th class="w15">Единицы</th>
+                            <th class="w20">Кол-во</th>
+                            <th class="w25">Цена</th>
+                            <th class="w15">НДС</th>
+                            <th class="w25">Итого с НДС</th>
+                        </tr>
+                    </theader>
+                    <tbody>
+                        <tr>
+                            <td class="w80" align="center">
+                                Заказ услуги и координирование исполнения заказа <b> №#{{ order.refNo }} от {{ order.createdAtPretty }} </b> на сайте <b> {{ config.siteName }} </b><br/>
+                            </td>
+                            <td align="center" class="w15">шт</td>
+                            <td align="center" class="w20">1</td>
+                            <td align="center" class="w25">{{ order.clientPrice }} {{ config.currencySymbol }}</td>
+                            <td align="center" class="w15">{{ order.percentVAT }}%</td>
+                            <td align="center" class="w25">{{ order.totalPrice }} {{ config.currencySymbol }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="footer-data">
+                    <sub>*Документ подготовлен в электронном виде и действителен без подписи</sub>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

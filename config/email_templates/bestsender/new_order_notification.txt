@@ -1,0 +1,14 @@
+Зарегистрирован новый заказ с ID #{{ order.refNo }}
+
+Пользователь - {{ order.user }}
+
+{{  order.contents }}, {{  order.addressFrom  }} 
+=> 
+{{  order.addressTo  }},  
+
+{{ order.rateName }}, {{  order.carrierName  }} ({{ order.rateType }}).
+
+Желаемая дата забора: {{ order.pickupDate }}
+--
+С уважением,
+Робот bestsender.kz
