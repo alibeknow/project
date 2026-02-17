@@ -58,13 +58,13 @@ describe('POST /api/messages/add (messages:add)', () => {
     createdMessageId = res.body.result.id;
   });
 
-  it('client can send a message', async () => {
+  it('client can send a message (via user/send — client has messages:user_send not messages:add)', async () => {
+    // Client does NOT have messages:add — use POST /api/messages/user/send instead
     const res = await request
-      .post('/api/messages/add')
+      .post('/api/messages/user/send')
       .set(authAs('client'))
       .send({
         text: 'Hello from client',
-        ThreadUserId: threadUserId,
       });
 
     expectSuccess(res);
@@ -92,8 +92,9 @@ describe('GET /api/messages (messages:list)', () => {
     expect(Array.isArray(res.body.result) || res.body.result !== null).toBe(true);
   });
 
-  it('client can list their messages', async () => {
-    const res = await request.get('/api/messages').set(authAs('client'));
+  it('client can list their messages (via user/list — client has messages:user_list not messages:list)', async () => {
+    // Client does NOT have messages:list — use GET /api/messages/user/list instead
+    const res = await request.get('/api/messages/user/list').set(authAs('client'));
     expectSuccess(res);
   });
 
@@ -124,21 +125,30 @@ describe('GET /api/messages/threads/list (messages:threads_list)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// GET /api/messages/:threadId — single thread
+// GET /api/messages/get — single message by id (messages:get)
+// NOTE: Route GET /:threadId does NOT exist in routes/messages.js.
+// The actual single-message lookup is GET /get?id=<messageId>
 // ---------------------------------------------------------------------------
 
-describe('GET /api/messages/:threadId (messages:get)', () => {
-  it('admin can get messages for a specific thread user', async () => {
+describe('GET /api/messages/get (messages:get)', () => {
+  it('admin can get a message by id (uses createdMessageId from add test)', async () => {
+    // createdMessageId is set by the messages:add test that runs first
+    if (!createdMessageId) return;
+
     const res = await request
-      .get(`/api/messages/${threadUserId}`)
+      .get('/api/messages/get')
+      .query({ id: createdMessageId })
       .set(authAs('admin'));
 
     expectSuccess(res);
-    expect(Array.isArray(res.body.result) || res.body.result === null).toBe(true);
+    expect(res.body.result).toHaveProperty('id', createdMessageId);
   });
 
   it('returns 401 without auth', async () => {
-    const res = await request.get(`/api/messages/${threadUserId}`);
+    const res = await request
+      .get('/api/messages/get')
+      .query({ id: 99999 });
+
     expectError(res, 401);
   });
 });
@@ -197,13 +207,17 @@ describe('POST /api/messages/delete (messages:delete)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// GET /api/messages/:id/attachment/download (guest accessible)
+// GET /api/messages/attachment/download (guest accessible)
+// NOTE: The real route is GET /attachment/download?messageId=&attachmentId=&signature=
+// (not GET /:id/attachment/download)
 // ---------------------------------------------------------------------------
 
-describe('GET /api/messages/:id/attachment/download', () => {
-  it('accessible without auth (guest permission)', async () => {
-    // Non-existent attachment — should be 404 or 500, but NOT 401/403
-    const res = await request.get('/api/messages/99999/attachment/download');
+describe('GET /api/messages/attachment/download', () => {
+  it('accessible without auth (guest permission) — returns 404 for missing message', async () => {
+    // Non-existent message — should be 404, but NOT 401/403 (guest allowed)
+    const res = await request
+      .get('/api/messages/attachment/download')
+      .query({ messageId: 99999, attachmentId: 1, signature: 'invalid' });
 
     expect(res.status).not.toBe(401);
     expect(res.status).not.toBe(403);

@@ -159,6 +159,13 @@ async function seedTestData(sequelize, API_KEYS) {
       ZoneId: zone.id, RateTypeId: rtStd.id, PackageTypeId: pkgBox.id,
     }, { transaction: t });
 
+    // RateParam — required by reports/orders route (Carrier.RateParams join is required:true)
+    await models.RateParam.create({
+      CarrierId: carrier.id,
+      PackageTypeId: pkgBox.id,
+      RateTypeId: rtStd.id,
+    }, { transaction: t });
+
     // Additional service
     const svc = await models.AdditionalService.create(
       { name: { ru: 'Страховка', en: 'Insurance' }, code: 'insurance', calcType: 'fixed_price', action: 'insurance' },
@@ -168,8 +175,11 @@ async function seedTestData(sequelize, API_KEYS) {
     // Tag
     const tag = await models.Tag.create({ name: 'e2e-tag', color: '#ff0000' }, { transaction: t });
 
-    // ConfigParam — disable email notifications so register doesn't try to send to admin
-    await models.ConfigParam.create({ param: 'newUserNotification', value: 'false', type: 'boolean' }, { transaction: t });
+    // ConfigParams for email templates (forgot_password.html uses config.phone and config.email)
+    await models.ConfigParam.create({ param: 'phone', value: '+7 777 777 7777', type: 'string' }, { transaction: t });
+    await models.ConfigParam.create({ param: 'email', value: 'robot@bestsender.kz', type: 'string' }, { transaction: t });
+    // newUserNotification is intentionally NOT seeded so it stays undefined (falsy) →
+    // register route skips sending the notification email, avoiding template rendering errors
 
     // Seed order for client
     const order = await models.Order.create({

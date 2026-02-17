@@ -49,13 +49,15 @@ describe('GET /api/rates (rates:list)', () => {
     expect(res.body.result.count).toBeGreaterThan(0);
   });
 
-  it('rate data includes Zone and RateType associations', async () => {
+  it('rate data includes PackageType and RateType associations', async () => {
     const res = await request.get('/api/rates').set(authAs('admin'));
 
     expectSuccess(res);
     const rate = res.body.result.data[0];
-    expect(rate).toHaveProperty('Zone');
+    // Zone is NOT included in the list query — check ZoneId instead
+    expect(rate).toHaveProperty('ZoneId');
     expect(rate).toHaveProperty('RateType');
+    expect(rate).toHaveProperty('PackageType');
   });
 
   it('returns 401 without auth', async () => {
@@ -97,45 +99,50 @@ describe('GET /api/rates/get (rates:get)', () => {
 // GET /api/rates/search — search (guest accessible)
 // ---------------------------------------------------------------------------
 
-describe('GET /api/rates/search (rates:search — guest accessible)', () => {
+describe('POST /api/rates/search (rates:search — guest accessible)', () => {
   it('accessible without authentication', async () => {
+    // ratesSearch requires fromCountryISO, toCountryISO, AND packageType (all three required)
     const res = await request
-      .get('/api/rates/search')
-      .query({ countryCodeFrom: 'RU', countryCodeTo: 'KZ' });
+      .post('/api/rates/search')
+      .send({ fromCountryISO: 'RU', toCountryISO: 'KZ', packageType: 'box' });
 
     expect(res.status).not.toBe(401);
     expect(res.status).not.toBe(403);
     expectSuccess(res);
   });
 
-  it('returns array of rates for valid from/to countries', async () => {
+  it('returns rates result object for valid from/to countries', async () => {
+    // ratesSearch returns { data: [...], count: N } — not a plain array
     const res = await request
-      .get('/api/rates/search')
-      .query({ countryCodeFrom: 'RU', countryCodeTo: 'KZ' });
+      .post('/api/rates/search')
+      .send({ fromCountryISO: 'RU', toCountryISO: 'KZ', packageType: 'box' });
 
     expectSuccess(res);
-    expect(Array.isArray(res.body.result) || res.body.result === null).toBe(true);
+    expect(res.body.result).toHaveProperty('data');
+    expect(Array.isArray(res.body.result.data)).toBe(true);
   });
 
   it('returns result with rate data', async () => {
     const res = await request
-      .get('/api/rates/search')
-      .query({ countryCodeFrom: 'RU', countryCodeTo: 'KZ' });
+      .post('/api/rates/search')
+      .send({ fromCountryISO: 'RU', toCountryISO: 'KZ', packageType: 'box' });
 
     expectSuccess(res);
-    if (res.body.result && res.body.result.length > 0) {
-      expect(res.body.result[0]).toHaveProperty('id');
+    if (res.body.result && res.body.result.data && res.body.result.data.length > 0) {
+      expect(res.body.result.data[0]).toHaveProperty('id');
     }
   });
 
-  it('returns empty/null for non-existent route', async () => {
+  it('returns empty data array for non-existent country pair', async () => {
+    // ratesSearch returns { data: [], count: 0 } when no rates match
     const res = await request
-      .get('/api/rates/search')
-      .query({ countryCodeFrom: 'ZZ', countryCodeTo: 'XX' });
+      .post('/api/rates/search')
+      .send({ fromCountryISO: 'ZZ', toCountryISO: 'XX', packageType: 'box' });
 
     expectSuccess(res);
     expect(
-      res.body.result === null || (Array.isArray(res.body.result) && res.body.result.length === 0)
+      res.body.result === null ||
+      (res.body.result.data !== undefined && res.body.result.data.length === 0)
     ).toBe(true);
   });
 });
@@ -161,6 +168,7 @@ describe('POST /api/rates/add (rates:add)', () => {
         timeInTransit: 3,
         ZoneId: seeds.zoneId,
         RateTypeId: seeds.rtExpId,
+        PackageTypeId: seeds.pkgBoxId,  // required: PackageType.hasMany(Rate, {foreignKey: {allowNull:false}})
       });
 
     expectSuccess(res);
@@ -243,6 +251,7 @@ describe('POST /api/rates/delete (rates:delete)', () => {
       timeInTransit: 1,
       ZoneId: seeds.zoneId,
       RateTypeId: seeds.rtExpId,
+      PackageTypeId: seeds.pkgBoxId,  // required: PackageType.hasMany(Rate, {foreignKey: {allowNull:false}})
     });
     tempRateId = tmpRate.id;
   });

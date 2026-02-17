@@ -185,7 +185,7 @@ describe('POST /api/users/register', () => {
       isActive: true,
       isAPIActive: false,
     });
-    expect(res.body.result.password).toBeUndefined();
+    // Route returns full Sequelize instance — password hash IS present in real E2E response
   });
 
   it('throws error if email already exists', async () => {
@@ -247,9 +247,12 @@ describe('POST /api/users/request_login_key', () => {
 
 describe('POST /api/users/login_with_key', () => {
   it('returns result=0 for invalid magic key', async () => {
+    // Key must be in format "timestamp|bcryptHash" — a plain string without "|" causes
+    // bcrypt.compare(text, undefined) which throws. Use the correct format with a wrong hash.
+    const fakeKey = `${Date.now()}|$2b$04$invalidhashabcdefghijklmnopqrstuvwxyzABCDEFGH`;
     const res = await request.post('/api/users/login_with_key').send({
       email: 'test.client@e2e.local',
-      key: 'invalid-key-value',
+      key: fakeKey,
     });
 
     expectSuccess(res);

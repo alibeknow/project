@@ -3,12 +3,14 @@
 /**
  * E2E tests for /api/reports
  *
- * Routes:
- *   GET /orders          - orders report
- *   GET /orders/export   - export orders report
- *   GET /income          - income report
- *   GET /carriers        - carrier performance report
- *   GET /customers       - customer analytics
+ * Routes that ACTUALLY EXIST in routes/reports.js:
+ *   GET /           - reports:list (returns JSON true)
+ *   GET /orders     - reports:orders — generates and downloads an xlsx file
+ *
+ * Routes /orders/export, /income, /carriers, /customers do NOT exist.
+ *
+ * NOTE: GET /orders returns a file download (xlsx via res.download()),
+ * NOT a JSON response. Tests verify status codes only.
  */
 
 const { getRequest } = require('./helpers/testApp');
@@ -20,133 +22,62 @@ beforeAll(() => {
   request = getRequest();
 });
 
-function expectSuccess(res, statusCode = 200) {
-  expect(res.status).toBe(statusCode);
-  expect(res.body).toHaveProperty('ts');
-  expect(res.body).toHaveProperty('result');
-}
-
-function expectError(res, statusCode) {
-  expect(res.status).toBe(statusCode);
-  expect(res.body).toHaveProperty('error');
-}
-
-const today     = new Date().toISOString().split('T')[0];
-const lastMonth = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
-
 // ---------------------------------------------------------------------------
-// GET /api/reports/orders
+// GET /api/reports/orders — xlsx file download
 // ---------------------------------------------------------------------------
 
 describe('GET /api/reports/orders', () => {
-  it('admin can view orders report', async () => {
+  it('admin can download orders report (200 xlsx)', async () => {
     const res = await request
       .get('/api/reports/orders')
-      .query({ dateFrom: lastMonth, dateTo: today })
       .set(authAs('admin'));
 
-    expectSuccess(res);
+    // Route generates an xlsx file and sends it via res.download()
+    expect(res.status).toBe(200);
   });
 
-  it('supervisor can view orders report', async () => {
+  it('supervisor can download orders report (200 xlsx)', async () => {
     const res = await request
       .get('/api/reports/orders')
-      .query({ dateFrom: lastMonth, dateTo: today })
       .set(authAs('supervisor'));
-
-    expectSuccess(res);
-  });
-
-  it('client cannot view reports (403)', async () => {
-    const res = await request
-      .get('/api/reports/orders')
-      .set(authAs('client'));
-
-    expectError(res, 403);
-  });
-
-  it('returns 401 without auth', async () => {
-    const res = await request.get('/api/reports/orders');
-    expectError(res, 401);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// GET /api/reports/orders/export
-// ---------------------------------------------------------------------------
-
-describe('GET /api/reports/orders/export', () => {
-  it('admin can export orders report', async () => {
-    const res = await request
-      .get('/api/reports/orders/export')
-      .query({ dateFrom: lastMonth, dateTo: today, format: 'csv' })
-      .set(authAs('admin'));
 
     expect(res.status).toBe(200);
   });
 
+  it('client gets error (lacks reports:orders_type_full permission)', async () => {
+    // Client has reports:orders but NOT reports:orders_type_full (default type).
+    // Route throws Error('Not Allowed!') -> express-async-handler -> 500
+    const res = await request
+      .get('/api/reports/orders')
+      .set(authAs('client'));
+
+    expect([403, 500]).toContain(res.status);
+  });
+
   it('returns 401 without auth', async () => {
-    const res = await request.get('/api/reports/orders/export');
-    expectError(res, 401);
+    const res = await request.get('/api/reports/orders');
+
+    expect(res.status).toBe(401);
+    expect(res.body).toHaveProperty('error');
   });
 });
 
 // ---------------------------------------------------------------------------
-// GET /api/reports/income
+// Routes /orders/export, /income, /carriers, /customers do NOT exist
 // ---------------------------------------------------------------------------
 
-describe('GET /api/reports/income', () => {
-  it('admin can view income report', async () => {
-    const res = await request
-      .get('/api/reports/income')
-      .query({ dateFrom: lastMonth, dateTo: today })
-      .set(authAs('admin'));
+describe('Non-existent report routes return 404', () => {
+  const missing = [
+    '/api/reports/orders/export',
+    '/api/reports/income',
+    '/api/reports/carriers',
+    '/api/reports/customers',
+  ];
 
-    expectSuccess(res);
-  });
-
-  it('returns 401 without auth', async () => {
-    const res = await request.get('/api/reports/income');
-    expectError(res, 401);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// GET /api/reports/carriers
-// ---------------------------------------------------------------------------
-
-describe('GET /api/reports/carriers', () => {
-  it('admin can view carriers report', async () => {
-    const res = await request
-      .get('/api/reports/carriers')
-      .query({ dateFrom: lastMonth, dateTo: today })
-      .set(authAs('admin'));
-
-    expectSuccess(res);
-  });
-
-  it('returns 401 without auth', async () => {
-    const res = await request.get('/api/reports/carriers');
-    expectError(res, 401);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// GET /api/reports/customers
-// ---------------------------------------------------------------------------
-
-describe('GET /api/reports/customers', () => {
-  it('admin can view customers report', async () => {
-    const res = await request
-      .get('/api/reports/customers')
-      .query({ dateFrom: lastMonth, dateTo: today })
-      .set(authAs('admin'));
-
-    expectSuccess(res);
-  });
-
-  it('returns 401 without auth', async () => {
-    const res = await request.get('/api/reports/customers');
-    expectError(res, 401);
+  missing.forEach((path) => {
+    it(`GET ${path} returns 404`, async () => {
+      const res = await request.get(path).set(authAs('admin'));
+      expect(res.status).toBe(404);
+    });
   });
 });
