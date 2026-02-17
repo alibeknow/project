@@ -749,7 +749,7 @@ class CseAPI {
          </soap:Body>
         </soap:Envelope>`;
 
-        //console.log('xml:', xml);
+        console.log('xml:', xml);
 
         let res = await this._makeRequest(xml);
         res = convert.xml2js(res, { compact: true, ignoreComment: true, spaces: 4 });

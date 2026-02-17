@@ -16,7 +16,7 @@ const TatexAPI = require ('./tatex');
 const SmartDeliveryAPI = require ('./smartdelivery');
 const RocketDeliveryAPI = require ('./rocketdelivery');
 
-function createAPI(api) {
+function createAPI(api='ase') {
 
   switch (api) {
     case 'alemtat': 

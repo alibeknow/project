@@ -4,12 +4,17 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "nodemon ./bin/www"
+    "dev": "nodemon ./bin/www",
+    "test": "jest --runInBand",
+    "test:e2e": "jest --runInBand --testPathPattern='tests/e2e'",
+    "test:coverage": "jest --runInBand --coverage",
+    "test:verbose": "JEST_VERBOSE=1 jest --runInBand",
+    "test:watch": "jest --watch --runInBand"
   },
   "dependencies": {
     "abort-controller": "^3.0.0",
     "assert": "^2.0.0",
-    "bcrypt": "^3.0.8",
+    "bcrypt": "^5.1.1",
     "cloudpayments": "^4.1.1",
     "cls-hooked": "^4.2.2",
     "console-stamp": "^3.0.0-rc4.2",
@@ -41,8 +46,8 @@
     "morgan": "~1.9.1",
     "node-fetch": "^2.6.1",
     "nodemailer": "^6.4.11",
-    "pg": "^7.18.1",
-    "pg-hstore": "^2.3.3",
+    "pg": "^8.18.0",
+    "pg-hstore": "^2.3.4",
     "pug": "2.0.0-beta11",
     "puppeteer": "^5.3.1",
     "query-string": "^6.13.1",
@@ -58,7 +63,11 @@
     "xml-js": "^1.6.11"
   },
   "devDependencies": {
+    "@testcontainers/postgresql": "^10.9.0",
+    "jest": "^29.7.0",
     "nodemon": "^2.0.19",
-    "sequelize-cli": "^6.2.0"
+    "sequelize-cli": "^6.2.0",
+    "supertest": "^6.3.4",
+    "testcontainers": "^10.9.0"
   }
 }
